@@ -3,14 +3,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { createPortal } from 'react-dom';
 
+interface Photo {
+  id: string;
+  author: string;
+  width: number;
+  height: number;
+  url: string;
+  download_url: string;
+}
+
 interface ImageModalProps {
-  photo: {
-    id: string;
-    author: string;
-    download_url: string;
-    width: number;
-    height: number;
-  } | null;
+  photo: Photo | null;
   onClose: () => void;
 }
 
@@ -24,7 +27,6 @@ const ImageModal: React.FC<ImageModalProps> = ({ photo, onClose }) => {
   useEffect(() => {
     if (photo) {
       setShouldRender(true); // Mount the component to start fade-in
-      // Use requestAnimationFrame to ensure DOM is ready before applying opacity change
       requestAnimationFrame(() => {
         requestAnimationFrame(() => { // Double rAF for robust transition trigger
           setIsVisible(true);
@@ -39,7 +41,7 @@ const ImageModal: React.FC<ImageModalProps> = ({ photo, onClose }) => {
       }, 300); // This must match the CSS transition duration (duration-300)
       return () => clearTimeout(timer); // Cleanup timeout
     }
-  }, [photo]); // Dependency on 'photo' prop
+  }, [photo]);
 
   // Effect for event listeners and body overflow (runs when 'shouldRender' changes)
   useEffect(() => {
@@ -59,19 +61,14 @@ const ImageModal: React.FC<ImageModalProps> = ({ photo, onClose }) => {
       document.addEventListener('mousedown', handleOutsideClick);
       document.addEventListener('keydown', handleEscapeKey);
       document.body.style.overflow = 'hidden'; // Prevent background scrolling
-      // Optional: Add padding-right to body to prevent content shift if scrollbar disappears
-      // const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-      // document.body.style.paddingRight = `${scrollbarWidth}px`;
     } else {
       document.body.style.overflow = ''; // Re-enable background scrolling
-      // document.body.style.paddingRight = ''; // Remove padding-right
     }
 
     return () => { // Cleanup listeners and overflow style
       document.removeEventListener('mousedown', handleOutsideClick);
       document.removeEventListener('keydown', handleEscapeKey);
-      document.body.style.overflow = ''; // Always ensure overflow is reset on unmount
-      // document.body.style.paddingRight = '';
+      document.body.style.overflow = '';
     };
   }, [shouldRender, isVisible, onClose]);
 
@@ -87,8 +84,13 @@ const ImageModal: React.FC<ImageModalProps> = ({ photo, onClose }) => {
     >
       <div
         ref={modalRef}
-        // KEY CHANGE HERE: overflow-hidden changed to overflow-y-auto
-        className={`relative max-w-4xl max-h-[90vh] overflow-y-auto rounded-lg bg-white shadow-xl
+        // KEY CHANGES HERE FOR FIXED SIZE:
+        // w-11/12: Take up 90% of screen width on smaller screens
+        // max-w-3xl: Cap the width at Tailwind's '3xl' breakpoint (~768px) for larger screens
+        // h-[80vh]: Set a fixed height as 80% of the viewport height, ensuring consistency
+        // flex flex-col: Use flexbox for vertical alignment of image and text
+        className={`w-11/12 max-w-3xl h-[80vh] flex flex-col overflow-y-auto
+                    relative rounded-lg bg-white shadow-xl
                     transform transition-all duration-300 ease-out ${isVisible ? 'scale-100' : 'scale-95'}`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -99,20 +101,23 @@ const ImageModal: React.FC<ImageModalProps> = ({ photo, onClose }) => {
         >
           &times;
         </button>
-        <div className="relative w-full h-full flex items-center justify-center">
+        {/* Container for the image, ensure it takes up available space */}
+        <div className="relative flex-grow flex items-center justify-center p-4">
           {photo && (
             <Image
               src={photo.download_url}
               alt={photo.author}
               width={photo.width}
               height={photo.height}
+              // Image will object-contain within the now fixed-size parent
               className="max-w-full max-h-full object-contain"
               quality={90}
-              sizes="(max-width: 768px) 100vw, 75vw"
+              sizes="(max-width: 768px) 90vw, 75vw" // Adjust sizes to reflect new modal max-width
             />
           )}
         </div>
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
+        {/* Details section, positioned at the bottom relative to the modal's fixed height */}
+        <div className="relative bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
           {photo && (
             <>
               <p className="text-lg font-bold">{photo.author}</p>
