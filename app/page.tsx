@@ -33,7 +33,7 @@ export default function Home() {
   // consumed in the JSX or another effect, but its presence is crucial for the hook's logic.
   // For strict ESLint, we ensure setIsFetching is correctly called,
   // and 'loading' state handles the UI indicator.
-  const [_, setIsFetching] = useInfiniteScroll(fetchMoreImages); // Destructure without 'isFetching'
+  const [, setIsFetching] = useInfiniteScroll(fetchMoreImages); // Destructure without 'isFetching'
 
   const loadImages = useCallback(async (pageNum: number) => {
     setLoading(true);
