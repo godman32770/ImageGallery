@@ -67,50 +67,6 @@ yarn install
 pnpm install
 ```
 
----
-
-## 🔑 Environment Variables
-
-None required for this project. The Picsum API does not need an API key.
-
-If you integrate another API (like Unsplash), create a `.env.local`:
-```env
-NEXT_PUBLIC_YOUR_API_KEY=your_secret_key_here
-```
-
-And use it in code:
-```ts
-process.env.NEXT_PUBLIC_YOUR_API_KEY
-```
-
----
-
-## 📄 API Documentation
-
-**Base URL:** `https://picsum.photos/v2/list`
-
-**Query Parameters:**
-- `page`: Optional (default: 1)
-- `limit`: Optional (default: 30, max: 100)
-
-**Example Request Used:**
-```http
-GET https://picsum.photos/v2/list?page=1&limit=9
-```
-
-**Example Response:**
-```json
-[
-  {
-    "id": "0",
-    "author": "Alejandro Escamilla",
-    "width": 5000,
-    "height": 3333,
-    "url": "https://unsplash.com/photos/yC-Yzbqy7PY",
-    "download_url": "https://picsum.photos/id/0/5000/3333"
-  }
-]
-```
 
 ---
 
