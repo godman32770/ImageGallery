@@ -27,7 +27,13 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<Photo | null>(null);
 
-  const [isFetching, setIsFetching] = useInfiniteScroll(fetchMoreImages);
+  // 'isFetching' from useInfiniteScroll is used internally by the hook itself
+  // and setIsFetching is used to control its state. The ESLint warning
+  // for 'isFetching' being unused here is often a false positive if not directly
+  // consumed in the JSX or another effect, but its presence is crucial for the hook's logic.
+  // For strict ESLint, we ensure setIsFetching is correctly called,
+  // and 'loading' state handles the UI indicator.
+  const [_, setIsFetching] = useInfiniteScroll(fetchMoreImages); // Destructure without 'isFetching'
 
   const loadImages = useCallback(async (pageNum: number) => {
     setLoading(true);
@@ -43,13 +49,15 @@ export default function Home() {
       setLoading(false);
       setIsFetching(false); // Reset fetching state after load
     }
-  }, [setIsFetching]);
+  }, [setIsFetching]); // Dependencies for useCallback
 
+  // Effect for initial load, now correctly depends on loadImages
   useEffect(() => {
-    loadImages(page);
-  }, []); // Initial load
+    loadImages(1); // Explicitly load page 1 on mount
+  }, [loadImages]); // 'loadImages' is stable due to useCallback
 
   function fetchMoreImages() {
+    // Only fetch more if not already loading and no error
     if (!loading && !error) {
       loadImages(page);
     } else {
@@ -68,11 +76,12 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
       <h1 className="text-4xl font-extrabold text-center text-gray-900 mb-10 mt-4">
-        Image Gallery Web
+        Picsum Image Gallery
       </h1>
 
       {error && <ErrorMessage message={error} />}
 
+      {/* Corrected Responsive Grid Layout as per previous discussion */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {images.map((photo) => (
           <ImageCard key={photo.id} photo={photo} onClick={handleImageClick} />
