@@ -84,11 +84,6 @@ const ImageModal: React.FC<ImageModalProps> = ({ photo, onClose }) => {
     >
       <div
         ref={modalRef}
-        // KEY CHANGES HERE FOR FIXED SIZE:
-        // w-11/12: Take up 90% of screen width on smaller screens
-        // max-w-3xl: Cap the width at Tailwind's '3xl' breakpoint (~768px) for larger screens
-        // h-[80vh]: Set a fixed height as 80% of the viewport height, ensuring consistency
-        // flex flex-col: Use flexbox for vertical alignment of image and text
         className={`w-11/12 max-w-3xl h-[80vh] flex flex-col overflow-y-auto
                     relative rounded-lg bg-white shadow-xl
                     transform transition-all duration-300 ease-out ${isVisible ? 'scale-100' : 'scale-95'}`}
@@ -109,20 +104,35 @@ const ImageModal: React.FC<ImageModalProps> = ({ photo, onClose }) => {
               alt={photo.author}
               width={photo.width}
               height={photo.height}
-              // Image will object-contain within the now fixed-size parent
               className="max-w-full max-h-full object-contain"
               quality={90}
-              sizes="(max-width: 768px) 90vw, 75vw" // Adjust sizes to reflect new modal max-width
+              sizes="(max-width: 768px) 90vw, 75vw"
             />
           )}
         </div>
         {/* Details section, positioned at the bottom relative to the modal's fixed height */}
-        <div className="relative bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
+        <div className="relative bg-black to-transparent p-6 text-white flex justify-between items-center"> {/* Added flex and justify-between */}
           {photo && (
             <>
-              <p className="text-lg font-bold">{photo.author}</p>
-              <p className="text-sm">ID: {photo.id}</p>
-              <p className="text-sm">Dimensions: {photo.width}x{photo.height}</p>
+              <div> {/* Wrapper for text details */}
+                <p className="text-lg font-bold">{photo.author}</p>
+                <p className="text-sm">ID: {photo.id}</p>
+                <p className="text-sm">Dimensions: {photo.width}x{photo.height}</p>
+              </div>
+              {/* Download Button */}
+              <a
+                href={photo.download_url}
+                download={`${photo.author.replace(/\s/g, '_')}_${photo.id}.jpg`} // Suggests a filename
+                className="ml-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-lg flex items-center space-x-2"
+                target="_blank" // Open in new tab (good fallback if download attribute is ignored)
+                rel="noopener noreferrer" // Security best practice for target="_blank"
+              >
+                {/* Download icon (inline SVG) */}
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 000-1.414zM10 3a1 1 0 011 1v7a1 1 0 11-2 0V4a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+                <span>Download</span>
+              </a>
             </>
           )}
         </div>
